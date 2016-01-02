@@ -1,6 +1,6 @@
 aiohttp==0.19.0
 alabaster==0.7.7
-aslack==0.4.0
+aslack==0.5.0
 asynctest==0.5.0
 Babel==2.1.1
 beautifulsoup4==4.4.1
