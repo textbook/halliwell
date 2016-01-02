@@ -4,7 +4,7 @@ halliwell package
 halliwell.halliwell_bot module
 ------------------------------
 
-.. automodule:: halliwell.halliwell_bot
+.. automodule:: halliwell.bot
     :members:
     :show-inheritance:
 
