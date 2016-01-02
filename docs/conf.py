@@ -42,9 +42,10 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    'python': ('http://docs.python.org/3', None),
     'aiohttp': ('http://aiohttp.readthedocs.org/en/stable/', None),
     'aslack': ('http://pythonhosted.org/aslack/', None),
+    'bs4': ('http://www.crummy.com/software/BeautifulSoup/bs4/doc/', None),
+    'python': ('http://docs.python.org/3', None),
 }
 
 # Add any paths that contain templates here, relative to this directory.

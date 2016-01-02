@@ -20,4 +20,23 @@ Halliwell
 Halliwell is a Slack bot, built using aSlack_, that can give you useful
 information about movies. It's a work in progress!
 
+Compatibility
+-------------
+
+Halliwell uses asyncio_ with the ``async`` and ``await`` syntax, so is only
+compatible with Python versions 3.5 and above.
+
+Installation
+------------
+
+Halliwell is not available through the Python Package Index, PyPI_, but you can
+clone or fork the repository and use e.g.::
+
+    python setup.py develop
+
+to install locally for development. You should also install the development
+dependencies (ideally in a ``virtualenv``) using::
+
+    pip install -r requirements.txt
+
 .. _aSlack: https://pythonhosted.org/aslack
