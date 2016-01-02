@@ -48,8 +48,12 @@ class Movie:
         """).format(name=self.name, plot=self.plot, url=self.url).strip()
 
     async def update(self):
+        """Update the movie with additional information."""
         plot = await self.get_plot()
-        self.plot = truncate(plot) if plot is not None else self.DEFAULT_PLOT
+        if plot is None:
+            self.plot = self.DEFAULT_PLOT
+        else:
+            self.plot = truncate(plot.strip())
 
     async def get_plot(self):
         """Parse plot information from IMDb.
