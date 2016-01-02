@@ -78,12 +78,17 @@ class IMDbFinder:
           :py:attr:`result_class`: The object parsed from the element.
 
         """
-        link = element.find('a')
-        href = link['href']
-        id_ = self.url_regex.match(href).group(1)
+        link = element.find('td', attrs={'class': 'result_text'}).find('a')
+        id_ = self.url_regex.match(link['href']).group(1)
         return self.result_class(id_, link.string)
 
 
-movie_finder = IMDbFinder('tt', Movie)
+class MovieFinder(IMDbFinder):
+    """Add the ttype to narrow down results to films only."""
+
+    SEARCH_URL = 'http://akas.imdb.com/find?q={query}&s={key}&ttype=ft'
+
+
+movie_finder = MovieFinder('tt', Movie)
 
 person_finder = IMDbFinder('nm', Person)

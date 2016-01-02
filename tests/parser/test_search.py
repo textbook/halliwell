@@ -18,9 +18,18 @@ async def test_find(aiohttp, args, results):
     html = dedent("""
     <body>
         <table class="findList"><tbody>
-            <tr><a href="/title/tt0123456">Foo</a></tr>
-            <tr><a href="/title/tt1234567">Bar</a></tr>
-            <tr><a href="/title/tt2345678">Baz</a></tr>
+            <tr>
+                <td></td>
+                <td class="result_text"><a href="/title/tt0123456">Foo</a></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="result_text"><a href="/title/tt1234567">Bar</a></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="result_text"><a href="/title/tt2345678">Baz</a></td>
+            </tr>
         </tbody></table>
     </body>
     """)
@@ -37,10 +46,13 @@ async def test_find(aiohttp, args, results):
         with pytest.raises(results):
             await movie_finder.find(query, *args)
     else:
-        assert len(await movie_finder.find(query, *args)) == results
+        movies = await movie_finder.find(query, *args)
+        assert len(movies) == results
         aiohttp.get.assert_called_once_with(
-            'http://akas.imdb.com/find?q=foo%20bar&s=tt',
+            'http://akas.imdb.com/find?q=foo%20bar&s=tt&ttype=ft',
         )
+        movie = movies[0]
+        assert movie.name, movie.id_ == ('Foo', 'tt0123456')
 
 
 @mock.patch('halliwell.parser.search.aiohttp')
@@ -54,5 +66,5 @@ async def test_find_no_response(aiohttp):
     query = 'foo bar'
     assert await movie_finder.find(query) == []
     aiohttp.get.assert_called_once_with(
-        'http://akas.imdb.com/find?q=foo%20bar&s=tt',
+        'http://akas.imdb.com/find?q=foo%20bar&s=tt&ttype=ft',
     )
