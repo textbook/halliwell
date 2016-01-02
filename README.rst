@@ -39,4 +39,6 @@ dependencies (ideally in a ``virtualenv``) using::
 
     pip install -r requirements.txt
 
+.. _asyncio: https://docs.python.org/3/library/asyncio.html
+.. _PyPI: https://pypi.python.org/pypi
 .. _aSlack: https://pythonhosted.org/aslack
