@@ -1,11 +1,11 @@
 """An IMDbot built on aSlack and IMDbPY."""
 
-import asyncio
 import collections
 from textwrap import dedent
 
-from aslack import __author__, slack_bot
+from aslack import slack_bot
 
+from . import __author__, __name__ as mod_name, __version__
 from .parser import movie_finder
 
 
@@ -13,12 +13,14 @@ class Halliwell(slack_bot.SlackBot):
     """A bot to look up information on people in the movies."""
 
     INSTRUCTIONS = dedent("""
-    Hello, I am an aSlack bot running on Cloud Foundry.
+    Hello, I am an aSlack bot running on Cloud Foundry ({name} v{version}).
 
     For more information, see {aslack_url} or contact {author}.
     """.format(
         aslack_url='https://pythonhosted.org/aslack',
         author=__author__,
+        name=mod_name,
+        version=__version__,
     ))
 
     def message_is_movie_query(self, data):

@@ -2,9 +2,9 @@
 
 import logging
 
-from .bot import Halliwell
-
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __author__ = 'Jonathan Sharpe'
-__version__ = '0.2.0'
+__version__ = '0.3.0'
+
+from .bot import Halliwell
