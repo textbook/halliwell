@@ -20,7 +20,7 @@ class Halliwell(slack_bot.SlackBot):
 
     For more information, see {aslack_url} or contact {author}.
     """.format(
-        aslack_url='https://pythonhosted.org/aslack',
+        aslack_url='https://github.com/textbook/halliwell',
         author=__author__,
         name=mod_name,
         version=__version__,
