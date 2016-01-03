@@ -1,8 +1,8 @@
 """Search for things on IMDb.
 
 Attributes:
-  movie_finder (:py:class:`IMDbFinder`): Find movies on IMDb.
-  person_finder (:py:class:`IMDbFinder`): Find people on IMDb.
+  movie_finder (:py:class:`MovieFinder`): Find movies on IMDb.
+  person_finder (:py:class:`PersonFinder`): Find people on IMDb.
 
 """
 
@@ -40,7 +40,7 @@ class IMDbFinder:
     def __init__(self, key, result_class):
         self.key = key
         self.result_class = result_class
-        self.url_regex = re.compile(r'^/title/({}\d{{7}})'.format(self.key))
+        self.url_regex = None
 
     async def find(self, query, results=10):
         """Find the required content on IMDb.
@@ -84,11 +84,28 @@ class IMDbFinder:
 
 
 class MovieFinder(IMDbFinder):
-    """Add the ttype to narrow down results to films only."""
+    """Finder specifically for movies.
+
+    Note:
+      Adds the ttype to narrow down results to films only.
+
+    """
 
     SEARCH_URL = 'http://akas.imdb.com/find?q={query}&s={key}&ttype=ft'
 
+    def __init__(self):
+        super().__init__('tt', Movie)
+        self.url_regex = re.compile(r'^/title/({}\d{{7}})'.format(self.key))
 
-movie_finder = MovieFinder('tt', Movie)
 
-person_finder = IMDbFinder('nm', Person)
+class PersonFinder(IMDbFinder):
+    """Finder specifically for people."""
+
+    def __init__(self):
+        super().__init__('nm', Person)
+        self.url_regex = re.compile(r'^/name/({}\d{{7}})'.format(self.key))
+
+
+movie_finder = MovieFinder()
+
+person_finder = PersonFinder()
