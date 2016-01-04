@@ -1,4 +1,4 @@
-"""An IMDbot built on aSlack and IMDbPY."""
+"""An IMDbot built on aSlack."""
 
 import collections
 import logging
