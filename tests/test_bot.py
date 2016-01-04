@@ -28,6 +28,17 @@ def test_message_is_movie_query(data, matches):
     assert bot.message_is_movie_query(data) == matches
 
 
+@pytest.mark.parametrize('data,matches', [
+    ({'text': '<@foo>: actor in something', 'type': 'message'}, True),
+    ({}, False),
+    ({'text': '<@foo>: something else', 'type': 'message'}, False),
+    ({'text': 'nothing at all'}, False),
+])
+def test_message_is_actor_multiple_query(data, matches):
+    bot = Halliwell('foo', None, None)
+    assert bot.message_is_actor_multiple_query(data) == matches
+
+
 @mock.patch('halliwell.bot.movie_finder')
 @pytest.mark.asyncio
 async def test_provide_movie_data_missing(movie_finder):
@@ -80,3 +91,51 @@ async def test_provide_person_data(person_finder):
     expected = {'channel': 'channel', 'text': str(mock_person)}
     assert await bot.provide_person_data(data) == expected
     person_finder.find.assert_called_once_with('baz etc')
+
+
+@mock.patch('halliwell.bot.movie_finder')
+@mock.patch('halliwell.bot.friendly_list')
+@pytest.mark.asyncio
+async def test_find_overlapping_actors(friendly_list, movie_finder):
+    friendly_list.return_value = 'bar'
+    mock_actor = mock.CoroutineMock()
+    mock_first_movie = mock.CoroutineMock(name='One', cast={mock_actor})
+    mock_second_movie = mock.CoroutineMock(name='Two', cast={mock_actor})
+    first_result_future = asyncio.Future()
+    first_result_future.set_result([mock_first_movie])
+    second_result_future = asyncio.Future()
+    second_result_future.set_result([mock_second_movie])
+    movie_finder.find.side_effect = [first_result_future, second_result_future]
+    bot = Halliwell('foo', None, None)
+    data = {'text': '"foo" "bar"', 'channel': 'channel'}
+    response = await bot.find_overlapping_actors(data)
+    assert response['text'].startswith('The following actors are in bar:')
+    movie_finder.find.assert_any_call('foo')
+    movie_finder.find.assert_any_call('bar')
+
+
+@mock.patch('halliwell.bot.movie_finder')
+@mock.patch('halliwell.bot.friendly_list')
+@pytest.mark.asyncio
+async def test_find_overlapping_actors_no_overlap(friendly_list, movie_finder):
+    friendly_list.return_value = 'bar'
+    mock_first_movie = mock.CoroutineMock(name='One', cast=set())
+    first_result_future = asyncio.Future()
+    first_result_future.set_result([mock_first_movie])
+    movie_finder.find.return_value = first_result_future
+    bot = Halliwell('foo', None, None)
+    data = {'text': '"foo" "bar"', 'channel': 'channel'}
+    response = await bot.find_overlapping_actors(data)
+    assert response['text'] == 'No actors found in bar'
+
+
+@mock.patch('halliwell.bot.movie_finder')
+@pytest.mark.asyncio
+async def test_find_overlapping_actors_no_movie(movie_finder):
+    first_result_future = asyncio.Future()
+    first_result_future.set_result([])
+    movie_finder.find.return_value = first_result_future
+    bot = Halliwell('foo', None, None)
+    data = {'text': '"foo"', 'channel': 'channel'}
+    response = await bot.find_overlapping_actors(data)
+    assert response['text'] == "Movie not found: 'foo'"

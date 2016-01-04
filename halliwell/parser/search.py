@@ -7,7 +7,6 @@ Attributes:
 """
 
 import logging
-import re
 from urllib.parse import quote
 
 import aiohttp
@@ -24,7 +23,7 @@ class IMDbFinder:
 
     Arguments:
       key (:py:class:`str`): The key for the class of object.
-      result_class (:py:class:`type`): The type of result to create.
+      result_class (:py:class:`IMDbBase`): The type of result to create.
 
     Attributes:
       SEARCH_URL (:py:class:`str`): The search URL.
@@ -40,7 +39,6 @@ class IMDbFinder:
     def __init__(self, key, result_class):
         self.key = key
         self.result_class = result_class
-        self.url_regex = None
 
     async def find(self, query, results=10):
         """Find the required content on IMDb.
@@ -75,12 +73,11 @@ class IMDbFinder:
           element (:py:class:`bs4.PageElement`): The element to parse.
 
         Return:
-          :py:attr:`result_class`: The object parsed from the element.
+          :py:attr:`IMDbBase`: The object parsed from the element.
 
         """
         link = element.find('td', attrs={'class': 'result_text'}).find('a')
-        id_ = self.url_regex.match(link['href']).group(1)
-        return self.result_class(id_, link.string)
+        return self.result_class.from_link(link)
 
 
 class MovieFinder(IMDbFinder):
@@ -95,17 +92,8 @@ class MovieFinder(IMDbFinder):
 
     def __init__(self):
         super().__init__('tt', Movie)
-        self.url_regex = re.compile(r'^/title/({}\d{{7}})'.format(self.key))
-
-
-class PersonFinder(IMDbFinder):
-    """Finder specifically for people."""
-
-    def __init__(self):
-        super().__init__('nm', Person)
-        self.url_regex = re.compile(r'^/name/({}\d{{7}})'.format(self.key))
 
 
 movie_finder = MovieFinder()
 
-person_finder = PersonFinder()
+person_finder = IMDbFinder('nm', Person)

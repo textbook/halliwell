@@ -1,16 +1,19 @@
 """Functionality for handling IMDb movies."""
 
 import logging
-from textwrap import dedent
+import re
 
 import aiohttp
 from aslack.utils import truncate
 from bs4 import BeautifulSoup
 
+from .base import IMDbBase
+from .person import Person
+
 logger = logging.getLogger(__name__)
 
 
-class Movie:
+class Movie(IMDbBase):
     """Represents a movie on IMDb.
 
     Arguments:
@@ -26,34 +29,45 @@ class Movie:
 
     """
 
+    COMBINED_URL = 'http://akas.imdb.com/title/{id_}/combined'
+
     DEFAULT_PLOT = '&lt;no plot summary found&gt;'
 
     FRIENDLY_URL = 'http://www.imdb.com/title/{id_}/'
 
     PLOT_URL = 'http://akas.imdb.com/title/{id_}/plotsummary'
 
+    URL_REGEX = re.compile(r'^/title/(tt\d{7})')
+
     def __init__(self, id_, name):
-        self.id_ = id_
-        self.name = name
-        self.url = self.FRIENDLY_URL.format(id_=id_)
+        super().__init__(id_, name)
+        self.cast = None
         self.plot = None
 
-    def __str__(self):
-        return dedent("""
-        *{name}*
+    async def get_cast(self):
+        """Parse cast information from IMDb.
 
-        {plot}
+        Returns:
+          :py:class:`set`: A set of :py:class:`Person` objects.
 
-        For more information see: {url}
-        """).format(name=self.name, plot=self.plot, url=self.url).strip()
-
-    async def update(self):
-        """Update the movie with additional information."""
-        plot = await self.get_plot()
-        if plot is None:
-            self.plot = self.DEFAULT_PLOT
-        else:
-            self.plot = truncate(plot.strip())
+        """
+        url = self.COMBINED_URL.format(id_=self.id_)
+        logger.info('Querying URL {!r}'.format(url))
+        response = await aiohttp.get(url)
+        logger.debug('Response status: {!r}'.format(response.status))
+        if response.status != 200:
+            return set()
+        body = await response.read()
+        soup = BeautifulSoup(body, 'html.parser')
+        cast_list = soup.find('table', attrs={'class', 'cast'})
+        cast = set()
+        for element in cast_list.findAll('tr'):
+            classes = element.attrs.get('class', [])
+            if 'odd' not in classes and 'even' not in classes:
+                continue
+            link = element.find('td', attrs={'class': 'nm'}).find('a')
+            cast.add(Person.from_link(link))
+        return cast
 
     async def get_plot(self):
         """Parse plot information from IMDb.
@@ -85,3 +99,18 @@ class Movie:
         synopsis = soup.find('div', attrs={'id': 'plotSynopsis'})
         if synopsis is not None:
             return synopsis.string
+
+    async def update(self):
+        """Update the movie with additional information."""
+        if self.plot is None:
+            plot = await self.get_plot()
+            if plot is None:
+                self.plot = self.DEFAULT_PLOT
+            else:
+                self.plot = truncate(plot.strip())
+        if self.cast is None:
+            self.cast = await self.get_cast()
+
+    def _data(self):
+        """The data to use in :py:method:`__str__`."""
+        return self.plot

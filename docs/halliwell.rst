@@ -1,8 +1,8 @@
 halliwell package
 =================
 
-halliwell.halliwell_bot module
-------------------------------
+halliwell.bot module
+--------------------
 
 .. automodule:: halliwell.bot
     :members:
@@ -15,3 +15,10 @@ halliwell.parser module
    :maxdepth: 2
 
    parser
+
+halliwell.utils module
+----------------------
+
+.. automodule:: halliwell.utils
+    :members:
+    :show-inheritance:

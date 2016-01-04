@@ -1,16 +1,18 @@
 """Functionality for handling IMDb people."""
 
 import logging
-from textwrap import dedent
+import re
 
 import aiohttp
 from aslack.utils import truncate
 from bs4 import BeautifulSoup
 
+from .base import IMDbBase
+
 logger = logging.getLogger(__name__)
 
 
-class Person:
+class Person(IMDbBase):
     """Represents a person on IMDb.
 
     Arguments:
@@ -25,28 +27,11 @@ class Person:
 
     FRIENDLY_URL = 'http://www.imdb.com/name/{id_}/'
 
+    URL_REGEX = re.compile(r'^/name/(nm\d{7})')
+
     def __init__(self, id_, name):
-        self.id_ = id_
-        self.name = name
+        super().__init__(id_, name)
         self.bio = None
-        self.url = self.FRIENDLY_URL.format(id_=id_)
-
-    def __str__(self):
-        return dedent("""
-        *{name}*
-
-        {bio}
-
-        For more information see: {url}
-        """).format(name=self.name, bio=self.bio, url=self.url).strip()
-
-    async def update(self):
-        """Update the person with additional information."""
-        bio = await self.get_bio()
-        if bio is None:
-            self.bio = self.DEFAULT_BIO
-        else:
-            self.bio = truncate(bio.strip())
 
     async def get_bio(self):
         """Parse biographical information from IMDb.
@@ -69,3 +54,15 @@ class Person:
             logger.debug(sibling)
             if sibling.name == 'div':
                 return sibling.p.text
+
+    async def update(self):
+        """Update the person with additional information."""
+        bio = await self.get_bio()
+        if bio is None:
+            self.bio = self.DEFAULT_BIO
+        else:
+            self.bio = truncate(bio.strip())
+
+    def _data(self):
+        """The data to use in :py:method:`__str__`."""
+        return self.bio

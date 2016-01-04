@@ -1,6 +1,13 @@
 parser module
 =============
 
+halliwell.parser.base
+---------------------
+
+.. automodule:: halliwell.parser.base
+    :members:
+    :show-inheritance:
+
 halliwell.parser.movie
 ----------------------
 
