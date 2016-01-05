@@ -186,6 +186,26 @@ async def test_find_cast(aiohttp):
 
 @mock.patch('halliwell.parser.movie.aiohttp')
 @pytest.mark.asyncio
+async def test_find_cast_no_cast(aiohttp):
+    html = "<body></body>"
+    html_future = asyncio.Future()
+    html_future.set_result(html)
+    resp_future = asyncio.Future()
+    resp_future.set_result(mock.MagicMock(
+        status=200,
+        **{'read.return_value': html_future}
+    ))
+    aiohttp.get.return_value = resp_future
+    movie = Movie('foo', None)
+    cast = await movie.get_cast()
+    assert len(cast) == 0
+    aiohttp.get.assert_called_once_with(
+        'http://akas.imdb.com/title/foo/combined',
+    )
+
+
+@mock.patch('halliwell.parser.movie.aiohttp')
+@pytest.mark.asyncio
 async def test_find_cast_no_response(aiohttp):
     resp_future = asyncio.Future()
     resp_future.set_result(mock.MagicMock(

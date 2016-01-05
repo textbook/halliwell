@@ -61,6 +61,8 @@ class Movie(IMDbBase):
         soup = BeautifulSoup(body, 'html.parser')
         cast_list = soup.find('table', attrs={'class', 'cast'})
         cast = set()
+        if cast_list is None:
+            return cast
         for element in cast_list.findAll('tr'):
             classes = element.attrs.get('class', [])
             if 'odd' not in classes and 'even' not in classes:
