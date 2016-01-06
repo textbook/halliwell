@@ -14,7 +14,7 @@ deploy:
     username: $CF_USERNAME
     password: $CF_PASSWORD
     organization: pivot-jsharpe
-    space: development
+    space: slack-apps
     manifest: manifest.yml
     on:
       tags: true
