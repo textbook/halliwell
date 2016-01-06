@@ -40,9 +40,14 @@ class Halliwell(slack_bot.SlackBot):
                 data['text'][len(self.address_as):].startswith('person'))
 
     def message_is_actor_multiple_query(self, data):
-        """If you send me a message asking 'actor in' with a quoted list of movies"""
+        """If you send me a message asking 'actors in' with a quoted list of movies"""
         return (self.message_is_to_me(data) and
-                data['text'][len(self.address_as):].startswith('actor in'))
+                data['text'][len(self.address_as):].startswith('actors in'))
+
+    def message_is_movie_multiple_query(self, data):
+        """If you send me a message asking 'movies with' with a quoted list of actors"""
+        return (self.message_is_to_me(data) and
+                data['text'][len(self.address_as):].startswith('movies with'))
 
     # Dispatchers
 
@@ -93,8 +98,12 @@ class Halliwell(slack_bot.SlackBot):
                 channel=data['channel'],
                 text='No actors found in {}'.format(friendly_titles),
             )
+        if len(cast) == 1:
+            template = 'The following actor is in {}:'
+        else:
+            template = 'The following actors are in {}:'
         text = '\n\n'.join([
-            'The following actors are in {}:'.format(friendly_titles),
+            template.format(friendly_titles),
         ] + [' - *{0.name}* ({0.url})'.format(actor) for actor in cast])
         return dict(channel=data['channel'], text=text)
 
