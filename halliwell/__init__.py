@@ -5,6 +5,6 @@ import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __author__ = 'Jonathan Sharpe'
-__version__ = '0.5.3'
+__version__ = '0.6.0'
 
 from .bot import Halliwell

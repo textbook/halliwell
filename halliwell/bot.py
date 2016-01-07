@@ -31,6 +31,8 @@ class Halliwell(slack_bot.SlackBot):
         version=__version__,
     ))
 
+    VERSION = ' '.join((mod_name, __version__))
+
     # Matches
 
     def message_is_movie_query(self, data):
