@@ -1,6 +1,6 @@
 """Functionality for interfacing with the IMDb objects."""
-from parser import person_finder, movie_finder
-from utils import friendly_list
+from .parser import person_finder, movie_finder
+from .utils import friendly_list
 
 
 async def get_movie_description(title):
