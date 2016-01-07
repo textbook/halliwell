@@ -21,14 +21,14 @@ class Halliwell(slack_bot.SlackBot):
     """The filmgoer's companion."""
 
     INSTRUCTIONS = dedent("""
-    Hello, I am an aSlack bot running on Cloud Foundry ({name} v{version}).
+    {name}: {doc} An aSlack bot running on Cloud Foundry.
 
     For more information, see {url} or contact {author}.
     """.format(
         author=__author__,
-        name=mod_name,
+        doc=__doc__,
+        name=mod_name.capitalize(),
         url='https://github.com/textbook/halliwell',
-        version=__version__,
     ))
 
     VERSION = ' '.join((mod_name, __version__))
