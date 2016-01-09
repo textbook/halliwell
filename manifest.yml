@@ -1,7 +1,7 @@
 ---
 applications:
 - name: halliwell
-  buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.3
+  buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.4
   command: python launch.py
   disk_quota: 512M
   memory: 128M
