@@ -83,8 +83,8 @@ class Halliwell(slack_bot.SlackBot):
         return dict(channel=data['channel'], text=text)
 
     MESSAGE_FILTERS = collections.OrderedDict([
-        (message_is_movie_query, provide_movie_data),
-        (message_is_person_query, provide_person_data),
         (message_is_actor_multiple_query, find_overlapping_actors),
         (message_is_movie_multiple_query, find_overlapping_movies),
+        (message_is_movie_query, provide_movie_data),
+        (message_is_person_query, provide_person_data),
     ])
