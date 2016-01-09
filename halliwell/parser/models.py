@@ -256,9 +256,9 @@ class Person(IMDbBase):
         credits = soup.select('#filmography > div.filmo-category-section')
         for role, films in zip(roles, credits):
             role_name = role['data-category']
-            for film in films.findAll('div'):
-                movie = await Movie.from_id('title', film['id'].split('-')[1])
-                filmography[role_name].add(movie)
+            role_name = 'actor' if role_name == 'actress' else role_name
+            for link in films.select('div > b > a'):
+                filmography[role_name].add(Movie.from_link(link))
         return filmography
 
     async def update(self):

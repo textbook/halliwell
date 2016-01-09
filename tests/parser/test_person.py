@@ -82,20 +82,25 @@ async def test_update_bio_exists(get_plot):
     get_plot.assert_not_called()
 
 
-@mock.patch.object(Movie, 'from_id')
 @mock.patch('halliwell.parser.models.aiohttp')
 @pytest.mark.asyncio
-async def test_get_filmography_success(aiohttp, from_id):
+async def test_get_filmography_success(aiohttp):
     html = dedent("""
     <div id="filmography">
         <div class="head" data-category="actor"></div>
         <div class="filmo-category-section">
-            <div id="actor-tt0123456"></div>
-            <div id="actor-tt1234567"></div>
+            <div id="actor-tt0123456"><b>
+                <a href="/title/tt0123456">Foo</a>
+            </b></div>
+            <div id="actor-tt1234567"><b>
+                <a href="/title/tt1234567">Bar</a>
+            </b></div>
         </div>
         <div class="head" data-category="director"></div>
         <div class="filmo-category-section">
-            <div id="director-tt2345678"></div>
+            <div id="director-tt2345678"><b>
+                <a href="/title/tt2345678">Baz</a>
+            </b></div>
         </div>
     </div>
     """)
@@ -103,10 +108,6 @@ async def test_get_filmography_success(aiohttp, from_id):
         status=200,
         **{'read.return_value': future_from(html)}
     ))
-    ids = ['tt0123456', 'tt1234567', 'tt2345678']
-    from_id.side_effect = [
-        future_from(Movie(id_, None)) for id_ in ids
-    ]
     aiohttp.get.return_value = resp_future
     person = Person('foo', None)
     filmography = await person.get_filmography()
@@ -116,8 +117,6 @@ async def test_get_filmography_success(aiohttp, from_id):
     aiohttp.get.assert_called_once_with(
         'http://akas.imdb.com/name/foo/maindetails',
     )
-    for id_ in ids:
-        from_id.assert_any_call('title', id_)
 
 
 @mock.patch('halliwell.parser.models.aiohttp')

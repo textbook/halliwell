@@ -75,7 +75,7 @@ async def get_overlapping_movies(names):
     friendly_names = friendly_list(actor_names)
     movies = set.intersection(*[actor.filmography['actor'] for actor in actors])
     if not movies:
-        return 'No movies featuring {}'.format(friendly_names)
+        return 'No movies featuring {} found'.format(friendly_names)
     if len(movies) == 1:
         template = 'The following movie features {}:'
     else:
