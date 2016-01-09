@@ -57,7 +57,7 @@ the bot to interact on Slack::
    cf set-env halliwell SLACK_API_TOKEN <your-bot-api-token>
 
 To automatically deploy from Travis_, you'll need to add environment variables
-for your PWS name (`CF_USERNAME`) and password (`CF_PASSWORD`) through the
+for your PWS name (``$CF_USERNAME``) and password (``$CF_PASSWORD``) through the
 Travis control panel (``http://travis-ci.org/<your-name>/halliwell/settings``).
 You may also need to alter the ``org`` and ``space`` settings in
 ``manifest.yml``.
