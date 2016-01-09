@@ -84,3 +84,15 @@ async def test_find_overlapping_actors(get_overlapping_actors, bot):
     expected = {'text': 'hello world', 'channel': 'channel'}
     assert await bot.find_overlapping_actors(data) == expected
     get_overlapping_actors.assert_called_once_with(['foo', 'bar'])
+
+
+@mock.patch('halliwell.bot.get_overlapping_movies')
+@pytest.mark.asyncio
+async def test_find_overlapping_movies(get_overlapping_movies, bot):
+    result_future = asyncio.Future()
+    result_future.set_result('hello world')
+    get_overlapping_movies.return_value = result_future
+    data = {'text': '"foo" "bar"', 'channel': 'channel'}
+    expected = {'text': 'hello world', 'channel': 'channel'}
+    assert await bot.find_overlapping_movies(data) == expected
+    get_overlapping_movies.assert_called_once_with(['foo', 'bar'])

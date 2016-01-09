@@ -18,6 +18,16 @@ async def get_movie_description(title):
 
 
 async def get_overlapping_actors(titles):
+    """Find the actors appearing in multiple movies together.
+
+    Arguments:
+      titles (:py:class:`list`): The titles of the movies.
+
+    Returns:
+      :py:class:`str`: A description of the actors appearing in all
+        specified movies.
+
+    """
     movies = []
     movie_titles = []
     for title in titles:
@@ -37,7 +47,44 @@ async def get_overlapping_actors(titles):
         template = 'The following actors are in {}:'
     return '\n\n'.join([
         template.format(friendly_titles),
-    ] + [' - *{0.name}* ({0.url})'.format(actor) for actor in cast])
+    ] + [
+        ' - *{0.name}* ({0.url})'.format(actor) for actor in cast
+    ])
+
+
+async def get_overlapping_movies(names):
+    """Find the movies multiple actors have appeared in together.
+
+    Arguments:
+      names (:py:class:`list`): The names of the actors.
+
+    Returns:
+      :py:class:`str`: A description of the movies featuring all
+        specified actors.
+
+    """
+    actors = []
+    actor_names = []
+    for name in names:
+        actor = await _get_item(name, person_finder)
+        if actor is None:
+            return 'Person not found: {!r}'.format(name)
+        actors.append(actor)
+        actor_names.append(repr(actor.name))
+        await actor.update()
+    friendly_names = friendly_list(actor_names)
+    movies = set.intersection(*[actor.filmography['actor'] for actor in actors])
+    if not movies:
+        return 'No movies featuring {}'.format(friendly_names)
+    if len(movies) == 1:
+        template = 'The following movie features {}:'
+    else:
+        template = 'The following movies feature {}:'
+    return '\n\n'.join([
+        template.format(friendly_names)
+    ] + [
+        ' - *{0.name}* ({0.url})'.format(movie) for movie in movies
+    ])
 
 
 async def get_person_description(name):

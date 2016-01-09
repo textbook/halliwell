@@ -12,8 +12,7 @@ from urllib.parse import quote
 import aiohttp
 from bs4 import BeautifulSoup, SoupStrainer
 
-from .movie import Movie
-from .person import Person
+from .models import Movie, Person
 
 logger = logging.getLogger(__name__)
 

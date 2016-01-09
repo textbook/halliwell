@@ -10,6 +10,7 @@ from . import __author__, __name__ as mod_name, __version__
 from .imdb import (
     get_movie_description,
     get_overlapping_actors,
+    get_overlapping_movies,
     get_person_description,
 )
 from .utils import extract_quoted_text
@@ -75,8 +76,15 @@ class Halliwell(slack_bot.SlackBot):
         text = await get_overlapping_actors(titles)
         return dict(channel=data['channel'], text=text)
 
+    async def find_overlapping_movies(self, data):
+        """I will find movies featuring all of those actors."""
+        titles = extract_quoted_text(data['text'])
+        text = await get_overlapping_movies(titles)
+        return dict(channel=data['channel'], text=text)
+
     MESSAGE_FILTERS = collections.OrderedDict([
         (message_is_movie_query, provide_movie_data),
         (message_is_person_query, provide_person_data),
         (message_is_actor_multiple_query, find_overlapping_actors),
+        (message_is_movie_multiple_query, find_overlapping_movies),
     ])

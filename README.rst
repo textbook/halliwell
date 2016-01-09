@@ -29,16 +29,42 @@ compatible with Python versions 3.5 and above.
 Installation
 ------------
 
-Halliwell is not available through the Python Package Index, PyPI_, but you can
-clone or fork the repository and use e.g.::
+Halliwell is not currently available through the Python Package Index, PyPI_,
+but you can clone or fork the repository and use e.g.::
 
     python setup.py develop
 
-to install locally for development. You should also install the development
+to install it locally for development. You should also install the development
 dependencies (ideally in a ``virtualenv``) using::
 
     pip install -r requirements.txt
 
-.. _asyncio: https://docs.python.org/3/library/asyncio.html
-.. _PyPI: https://pypi.python.org/pypi
+These aren't required for running or using the app, but are necessary for
+running the tests and building the documentation.
+
+Deployment
+----------
+
+The project is set up to be deployed to `Pivotal Web Services`_. Due to some
+issues around `migrating to Diego`_, you should disable health checking for the
+app with::
+
+    cf set-health-check halliwell none
+
+You will also need to set the environment variable ``$SLACK_API_TOKEN`` to allow
+the bot to interact on Slack::
+
+   cf set-env halliwell SLACK_API_TOKEN <your-bot-api-token>
+
+To automatically deploy from Travis_, you'll need to add environment variables
+for your PWS name (`CF_USERNAME`) and password (`CF_PASSWORD`) through the
+Travis control panel (``http://travis-ci.org/<your-name>/halliwell/settings``).
+You may also need to alter the ``org`` and ``space`` settings in
+``manifest.yml``.
+
 .. _aSlack: https://pythonhosted.org/aslack
+.. _asyncio: https://docs.python.org/3/library/asyncio.html
+.. _migrating to Diego: https://support.run.pivotal.io/entries/105844873-Migrating-Applications-from-DEAs-to-Diego
+.. _Pivotal Web Services: http://run.pivotal.io/
+.. _PyPI: https://pypi.python.org/pypi
+.. _Travis: https://travis-ci.org/
