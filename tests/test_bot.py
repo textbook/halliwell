@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 import pytest
 from asynctest import mock
@@ -96,3 +97,35 @@ async def test_find_overlapping_movies(get_overlapping_movies, bot):
     expected = {'text': 'hello world', 'channel': 'channel'}
     assert await bot.find_overlapping_movies(data) == expected
     get_overlapping_movies.assert_called_once_with(['foo', 'bar'])
+
+
+@pytest.mark.parametrize('message,function,args', [
+    (
+        '<@foo>: person foo bar',
+        'get_person_description',
+        ('foo bar',),
+    ),
+    (
+        '<@foo>: movie foo bar',
+        'get_movie_description',
+        ('foo bar',),
+    ),
+    (
+        '<@foo>: movies with "foo", "bar" and "baz"',
+        'get_overlapping_movies',
+        (['foo', 'bar', 'baz'],),
+    ),
+    (
+        '<@foo>: actors in "foo", "bar" and "baz"',
+        'get_overlapping_actors',
+        (['foo', 'bar', 'baz'],),
+    ),
+])
+@pytest.mark.asyncio
+async def test_dispatch_precedence(bot, message, function, args):
+    data = {'text': message, 'channel': 'channel', 'type': 'message'}
+    msg = mock.Mock(data=json.dumps(data))
+    with mock.patch('halliwell.bot.{}'.format(function)) as dispatch_func:
+        dispatch_func.return_value = ''
+        await bot.handle_message(msg, bot.MESSAGE_FILTERS)
+        dispatch_func.assert_called_once_with(*args)
