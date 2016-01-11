@@ -7,4 +7,4 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 __author__ = 'Jonathan Sharpe'
 __version__ = '0.7.2'
 
-from .bot import Halliwell
+from .bot import Halliwell  # pylint: disable=wrong-import-position

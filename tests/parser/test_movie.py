@@ -25,29 +25,25 @@ def test_str():
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_plot_from_synopsis(aiohttp):
+async def test_find_plot_from_synopsis(get_page_content):
     html = dedent("""
     <body>
         <div id="plotSynopsis">Hello</div>
     </body>
     """)
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from(html)}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     movie = Movie('foo', None)
     assert await movie.get_plot() == 'Hello'
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/plotsummary',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_plot_from_summaries(aiohttp):
+async def test_find_plot_from_summaries(get_page_content):
     html = dedent("""
     <body>
         <ul class="zebraList">
@@ -57,82 +53,70 @@ async def test_find_plot_from_summaries(aiohttp):
         </ul>
     </body>
     """)
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from(html)}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     movie = Movie('foo', None)
     assert await movie.get_plot() == 'Hello'
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/plotsummary',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_plot_no_data(aiohttp):
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from("<body></body>")}
-    ))
-    aiohttp.get.return_value = resp_future
+async def test_find_plot_no_data(get_page_content):
+    get_page_content.return_value = future_from('<body></body>')
     movie = Movie('foo', None)
     assert await movie.get_plot() is None
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/plotsummary',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_plot_no_response(aiohttp):
-    aiohttp.get.return_value = future_from(mock.MagicMock(status=404))
+async def test_find_plot_no_response(get_page_content):
+    get_page_content.return_value = future_from(None)
     movie = Movie('foo', None)
     assert await movie.get_plot() is None
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/plotsummary',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_update_no_plot(aiohttp):
-    aiohttp.get.return_value = future_from(mock.MagicMock(status=404))
+async def test_update_no_plot(get_page_content):
+    get_page_content.return_value = future_from('<body></body>')
     movie = Movie('foo', None)
     movie.cast = set()
     assert await movie.update() is None
     assert 'no plot summary found' in movie.plot
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/plotsummary',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_update_plot(aiohttp):
+async def test_update_plot(get_page_content):
     html = dedent("""
     <body>
         <div id="plotSynopsis">Hello</div>
     </body>
     """)
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from(html)}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     movie = Movie('foo', None)
     movie.cast = set()
     assert await movie.update() is None
     assert movie.plot == 'Hello'
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/plotsummary',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_cast(aiohttp):
+async def test_find_cast(get_page_content):
     html = dedent("""
     <body>
         <table class="cast"><tbody>
@@ -146,44 +130,36 @@ async def test_find_cast(aiohttp):
         </tbody></table>
     </body>
     """)
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from(html)}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     movie = Movie('foo', None)
     cast = await movie.get_cast()
     assert len(cast) == 2
     assert Person('nm0123456', None) in cast
     assert Person('nm1234567', None) in cast
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/combined',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_cast_no_cast(aiohttp):
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from("<body></body>")}
-    ))
-    aiohttp.get.return_value = resp_future
+async def test_find_cast_no_cast(get_page_content):
+    get_page_content.return_value = future_from('<body></body>')
     movie = Movie('foo', None)
     cast = await movie.get_cast()
     assert len(cast) == 0
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/combined',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_cast_no_response(aiohttp):
-    aiohttp.get.return_value = future_from(mock.MagicMock(status=404))
+async def test_find_cast_no_response(get_page_content):
+    get_page_content.return_value = future_from(None)
     movie = Movie('foo', None)
     assert await movie.get_cast() == set()
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/title/foo/combined',
     )
 

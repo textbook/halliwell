@@ -30,7 +30,7 @@ class PyTest(TestCommand):
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
-        self.test_args = ['--runslow']
+        self.test_args = ['--runslow', '--pylint']
         self.test_suite = True
 
     def run_tests(self):
@@ -60,9 +60,11 @@ setup(
     packages=['halliwell'],
     platforms='any',
     tests_require=[
-        'pytest',
         'asynctest',
+        'pylint',
+        'pytest',
         'pytest-asyncio',
+        'pytest-pylint',
     ],
     url='http://github.com/textbook/halliwell/',
     version=halliwell.__version__,

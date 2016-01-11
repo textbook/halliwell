@@ -20,7 +20,7 @@ SECOND_MOCK = mock.CoroutineMock()
     ([], "Movie not found: 'foo'"),
     ([FIRST_MOCK], str(FIRST_MOCK)),
 ])
-@mock.patch('halliwell.imdb.movie_finder')
+@mock.patch('halliwell.imdb.MOVIE_FINDER')
 @pytest.mark.asyncio
 async def test_get_movie_description(movie_finder, found, expected):
     movie_finder.find.return_value = future_from(found)
@@ -50,7 +50,7 @@ async def test_get_movie_description(movie_finder, found, expected):
         "The following actors are in 'foo' and 'bar':",
     ),
 ])
-@mock.patch('halliwell.imdb.movie_finder')
+@mock.patch('halliwell.imdb.MOVIE_FINDER')
 @pytest.mark.asyncio
 async def test_get_overlapping_actors(movie_finder, found, expected):
     futures = []
@@ -100,7 +100,7 @@ async def test_get_overlapping_actors(movie_finder, found, expected):
         "The following movies feature 'foo' and 'bar':",
     ),
 ])
-@mock.patch('halliwell.imdb.person_finder')
+@mock.patch('halliwell.imdb.PERSON_FINDER')
 @pytest.mark.asyncio
 async def test_get_overlapping_movies(person_finder, found, expected):
     futures = []
@@ -123,7 +123,7 @@ async def test_get_overlapping_movies(person_finder, found, expected):
     ([], "Person not found: 'foo'"),
     ([FIRST_MOCK], str(FIRST_MOCK)),
 ])
-@mock.patch('halliwell.imdb.person_finder')
+@mock.patch('halliwell.imdb.PERSON_FINDER')
 @pytest.mark.asyncio
 async def test_get_person_description(person_finder, found, expected):
     person_finder.find.return_value = future_from(found)

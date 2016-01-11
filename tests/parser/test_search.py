@@ -1,10 +1,11 @@
-import asyncio
 from textwrap import dedent
 
 from asynctest import mock
 import pytest
 
-from halliwell.parser import movie_finder, person_finder
+from halliwell.parser import MOVIE_FINDER, PERSON_FINDER
+
+from helpers import future_from
 
 
 @pytest.mark.parametrize('args,results', [
@@ -12,9 +13,9 @@ from halliwell.parser import movie_finder, person_finder
     ((2,), 2),
     ((201,), ValueError),
 ])
-@mock.patch('halliwell.parser.search.aiohttp')
+@mock.patch('halliwell.parser.search.get_page_content')
 @pytest.mark.asyncio
-async def test_find(aiohttp, args, results):
+async def test_find(get_page_content, args, results):
     html = dedent("""
     <body>
         <table class="findList"><tbody>
@@ -33,31 +34,24 @@ async def test_find(aiohttp, args, results):
         </tbody></table>
     </body>
     """)
-    html_future = asyncio.Future()
-    html_future.set_result(html)
-    resp_future = asyncio.Future()
-    resp_future.set_result(mock.MagicMock(
-        status=200,
-        **{'read.return_value': html_future}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     query = 'foo bar'
     if type(results) is type and issubclass(results, Exception):
         with pytest.raises(results):
-            await movie_finder.find(query, *args)
+            await MOVIE_FINDER.find(query, *args)
     else:
-        movies = await movie_finder.find(query, *args)
+        movies = await MOVIE_FINDER.find(query, *args)
         assert len(movies) == results
-        aiohttp.get.assert_called_once_with(
+        get_page_content.assert_called_once_with(
             'http://akas.imdb.com/find?q=foo%20bar&s=tt&ttype=ft',
         )
         movie = movies[0]
         assert movie.name, movie.id_ == ('Foo', 'tt0123456')
 
 
-@mock.patch('halliwell.parser.search.aiohttp')
+@mock.patch('halliwell.parser.search.get_page_content')
 @pytest.mark.asyncio
-async def test_find_person(aiohttp):
+async def test_find_person(get_page_content):
     html = dedent("""
     <body>
         <table class="findList"><tbody>
@@ -68,34 +62,23 @@ async def test_find_person(aiohttp):
         </tbody></table>
     </body>
     """)
-    html_future = asyncio.Future()
-    html_future.set_result(html)
-    resp_future = asyncio.Future()
-    resp_future.set_result(mock.MagicMock(
-        status=200,
-        **{'read.return_value': html_future}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     query = 'foo bar'
-    people = await person_finder.find(query)
+    people = await PERSON_FINDER.find(query)
     assert len(people) == 1
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/find?q=foo%20bar&s=nm',
     )
     person = people[0]
     assert person.name, person.id_ == ('Foo', 'nm0123456')
 
 
-@mock.patch('halliwell.parser.search.aiohttp')
+@mock.patch('halliwell.parser.search.get_page_content')
 @pytest.mark.asyncio
-async def test_find_no_response(aiohttp):
-    resp_future = asyncio.Future()
-    resp_future.set_result(mock.MagicMock(
-        status=404,
-    ))
-    aiohttp.get.return_value = resp_future
+async def test_find_no_response(get_page_content):
+    get_page_content.return_value = future_from(None)
     query = 'foo bar'
-    assert await movie_finder.find(query) == []
-    aiohttp.get.assert_called_once_with(
+    assert await MOVIE_FINDER.find(query) == []
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/find?q=foo%20bar&s=tt&ttype=ft',
     )

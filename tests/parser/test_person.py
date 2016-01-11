@@ -25,9 +25,9 @@ def test_str():
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_find_plot_from_synopsis(aiohttp):
+async def test_find_plot_from_synopsis(get_page_content):
     html = dedent("""
     <body>
         <a name="mini_bio"></a>
@@ -38,26 +38,23 @@ async def test_find_plot_from_synopsis(aiohttp):
         </div>
     </body>
     """)
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from(html)}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     person = Person('foo', None)
     assert await person.get_bio() == 'The bio'
-    aiohttp.get.assert_called_once_with('http://akas.imdb.com/name/foo/bio')
+    get_page_content.assert_called_once_with('http://akas.imdb.com/name/foo/bio')
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_update_no_bio(aiohttp):
-    resp_future = future_from(mock.MagicMock(status=404))
-    aiohttp.get.return_value = resp_future
+async def test_update_no_bio(get_page_content):
+    get_page_content.return_value = future_from(None)
     person = Person('foo', None)
     person.filmography = {}
     assert await person.update() is None
     assert 'no biographical information found' in person.bio
-    aiohttp.get.assert_called_once_with('http://akas.imdb.com/name/foo/bio')
+    get_page_content.assert_called_once_with(
+        'http://akas.imdb.com/name/foo/bio',
+    )
 
 
 @mock.patch.object(Person, 'get_bio')
@@ -82,9 +79,9 @@ async def test_update_bio_exists(get_plot):
     get_plot.assert_not_called()
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_get_filmography_success(aiohttp):
+async def test_get_filmography_success(get_page_content):
     html = dedent("""
     <div id="filmography">
         <div class="head" data-category="actor"></div>
@@ -104,30 +101,25 @@ async def test_get_filmography_success(aiohttp):
         </div>
     </div>
     """)
-    resp_future = future_from(mock.MagicMock(
-        status=200,
-        **{'read.return_value': future_from(html)}
-    ))
-    aiohttp.get.return_value = resp_future
+    get_page_content.return_value = future_from(html)
     person = Person('foo', None)
     filmography = await person.get_filmography()
     assert Movie('tt0123456', None) in filmography['actor']
     assert Movie('tt1234567', None) in filmography['actor']
     assert Movie('tt2345678', None) in filmography['director']
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/name/foo/maindetails',
     )
 
 
-@mock.patch('halliwell.parser.models.aiohttp')
+@mock.patch('halliwell.parser.models.get_page_content')
 @pytest.mark.asyncio
-async def test_get_filmography_failure(aiohttp):
-    resp_future = future_from(mock.MagicMock(status=404))
-    aiohttp.get.return_value = resp_future
+async def test_get_filmography_failure(get_page_content):
+    get_page_content.return_value = future_from(None)
     person = Person('foo', None)
     filmography = await person.get_filmography()
     assert filmography == {}
-    aiohttp.get.assert_called_once_with(
+    get_page_content.assert_called_once_with(
         'http://akas.imdb.com/name/foo/maindetails',
     )
 

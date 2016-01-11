@@ -1,18 +1,18 @@
 """Search for things on IMDb.
 
 Attributes:
-  movie_finder (:py:class:`MovieFinder`): Find movies on IMDb.
-  person_finder (:py:class:`PersonFinder`): Find people on IMDb.
+  MOVIE_FINDER (:py:class:`MovieFinder`): Find movies on IMDb.
+  PERSON_FINDER (:py:class:`PersonFinder`): Find people on IMDb.
 
 """
 
 import logging
 from urllib.parse import quote
 
-import aiohttp
 from bs4 import BeautifulSoup, SoupStrainer
 
 from .models import Movie, Person
+from .utils import get_page_content
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +54,11 @@ class IMDbFinder:
         """
         if results > 200:
             raise ValueError('IMDb only shows up to 200 results')
-        url = self.SEARCH_URL.format(key=self.key, query=quote(query, safe=''))
-        logger.info('Querying URL {!r}'.format(url))
-        response = await aiohttp.get(url)
-        logger.debug('Response status: {!r}'.format(response.status))
-        if response.status != 200:
+        body = await get_page_content(
+            self.SEARCH_URL.format(key=self.key, query=quote(query, safe='')),
+        )
+        if body is None:
             return []
-        body = await response.read()
         soup = BeautifulSoup(body, 'html.parser', parse_only=self.TARGET)
         return [self.parse(element) for _, element in
                 zip(range(results), soup.findAll('tr'))]
@@ -69,7 +67,7 @@ class IMDbFinder:
         """
 
         Arguments:
-          element (:py:class:`bs4.PageElement`): The element to parse.
+          element (:py:class:`bs4.Tag`): The element to parse.
 
         Return:
           :py:attr:`IMDbBase`: The object parsed from the element.
@@ -93,6 +91,6 @@ class MovieFinder(IMDbFinder):
         super().__init__('tt', Movie)
 
 
-movie_finder = MovieFinder()
+MOVIE_FINDER = MovieFinder()
 
-person_finder = IMDbFinder('nm', Person)
+PERSON_FINDER = IMDbFinder('nm', Person)

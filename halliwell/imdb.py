@@ -1,5 +1,5 @@
 """Functionality for interfacing with the IMDb objects."""
-from .parser import person_finder, movie_finder
+from .parser import PERSON_FINDER, MOVIE_FINDER
 from .utils import friendly_list
 
 
@@ -13,7 +13,7 @@ async def get_movie_description(title):
       :py:class:`str`: The description of the movie.
 
     """
-    result = await _get_item_description(title, movie_finder)
+    result = await _get_item_description(title, MOVIE_FINDER)
     return result or 'Movie not found: {!r}'.format(title)
 
 
@@ -31,7 +31,7 @@ async def get_overlapping_actors(titles):
     movies = []
     movie_titles = []
     for title in titles:
-        movie = await _get_item(title, movie_finder)
+        movie = await _get_item(title, MOVIE_FINDER)
         if movie is None:
             return 'Movie not found: {!r}'.format(title)
         movies.append(movie)
@@ -66,7 +66,7 @@ async def get_overlapping_movies(names):
     actors = []
     actor_names = []
     for name in names:
-        actor = await _get_item(name, person_finder)
+        actor = await _get_item(name, PERSON_FINDER)
         if actor is None:
             return 'Person not found: {!r}'.format(name)
         actors.append(actor)
@@ -97,7 +97,7 @@ async def get_person_description(name):
       :py:class:`str`: The description of the person.
 
     """
-    result = await _get_item_description(name, person_finder)
+    result = await _get_item_description(name, PERSON_FINDER)
     return result or 'Person not found: {!r}'.format(name)
 
 

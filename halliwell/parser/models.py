@@ -1,3 +1,5 @@
+"""Models representing objects in IMDb."""
+
 import abc
 import logging
 import re
@@ -5,9 +7,10 @@ from collections import defaultdict
 from html import escape
 from textwrap import dedent
 
-import aiohttp
 from aslack.utils import truncate
 from bs4 import BeautifulSoup
+
+from .utils import get_page_content
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +62,16 @@ class IMDbBase(metaclass=abc.ABCMeta):
 
     @classmethod
     def from_link(cls, link):
-        id_ = cls.URL_REGEX.match(link['href']).group(1)
-        return cls(id_, link.string)
+        """Create a new instance of the class from a link element.
+
+        Arguments:
+          link (:py:class:`bs4.Tag`): The link element to parse.
+
+        Returns:
+          :py:class:`IMDbBase`: The newly-created instance.
+
+        """
+        return cls(cls.URL_REGEX.match(link['href']).group(1), link.string)
 
     @abc.abstractmethod
     def _data(self):
@@ -107,13 +118,9 @@ class Movie(IMDbBase):
           :py:class:`set`: A set of :py:class:`Person` objects.
 
         """
-        url = self.COMBINED_URL.format(id_=self.id_)
-        logger.info('Querying URL {!r}'.format(url))
-        response = await aiohttp.get(url)
-        logger.debug('Response status: {!r}'.format(response.status))
-        if response.status != 200:
+        body = await get_page_content(self.COMBINED_URL.format(id_=self.id_))
+        if body is None:
             return set()
-        body = await response.read()
         soup = BeautifulSoup(body, 'html.parser')
         cast_list = soup.find('table', attrs={'class', 'cast'})
         cast = set()
@@ -139,13 +146,9 @@ class Movie(IMDbBase):
           :py:class:`str`: A summary of the movie's plot.
 
         """
-        url = self.PLOT_URL.format(id_=self.id_)
-        logger.info('Querying URL {!r}'.format(url))
-        response = await aiohttp.get(url)
-        logger.debug('Response status: {!r}'.format(response.status))
-        if response.status != 200:
+        body = await get_page_content(self.PLOT_URL.format(id_=self.id_))
+        if body is None:
             return
-        body = await response.read()
         soup = BeautifulSoup(body, 'html.parser')
         summary_list = soup.find('ul', attrs={'class', 'zebraList'})
         if summary_list is not None:
@@ -209,13 +212,9 @@ class Person(IMDbBase):
           :py:class:`str`: The person's biography.
 
         """
-        url = self.BIO_URL.format(id_=self.id_)
-        logger.info('Querying URL {!r}'.format(url))
-        response = await aiohttp.get(url)
-        logger.debug('Response status: {!r}'.format(response.status))
-        if response.status != 200:
+        body = await get_page_content(self.BIO_URL.format(id_=self.id_))
+        if body is None:
             return
-        body = await response.read()
         soup = BeautifulSoup(body, 'html.parser')
         bio_link = soup.find('a', attrs={'name': 'mini_bio'})
         logger.debug(bio_link)
@@ -233,18 +232,14 @@ class Person(IMDbBase):
             a py:class:`set` of :py:class:`Movie` objects.
 
         """
-        url = self.DETAILS_URL.format(id_=self.id_)
-        logger.info('Querying URL {!r}'.format(url))
-        response = await aiohttp.get(url)
-        logger.debug('Response status: {!r}'.format(response.status))
-        if response.status != 200:
+        body = await get_page_content(self.DETAILS_URL.format(id_=self.id_))
+        if body is None:
             return {}
-        body = await response.read()
         filmography = defaultdict(set)
         soup = BeautifulSoup(body, 'html.parser')
         roles = soup.select('#filmography > div.head')
-        credits = soup.select('#filmography > div.filmo-category-section')
-        for role, films in zip(roles, credits):
+        credits_ = soup.select('#filmography > div.filmo-category-section')
+        for role, films in zip(roles, credits_):
             role_name = role['data-category']
             role_name = 'actor' if role_name == 'actress' else role_name
             for link in films.select('div > b > a'):
