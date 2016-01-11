@@ -57,34 +57,3 @@ def test_hash(first, second, expected):
         assert hash(first) == hash(second)
     else:
         assert hash(first) != hash(second)
-
-
-@mock.patch('halliwell.parser.models.aiohttp')
-@pytest.mark.asyncio
-async def test_from_id_success(aiohttp):
-    html = '<h1><span itemprop="name">Foo</span></h1>'
-    html_future = asyncio.Future()
-    html_future.set_result(html)
-    resp_future = asyncio.Future()
-    resp_future.set_result(mock.MagicMock(
-        status=200,
-        **{'read.return_value': html_future}
-    ))
-    aiohttp.get.return_value = resp_future
-    inst = await TestImplementation.from_id('foo', 'bar')
-    assert inst.id_ == 'bar'
-    assert inst.name == 'Foo'
-    aiohttp.get.assert_called_once_with('http://akas.imdb.com/foo/bar')
-
-
-@mock.patch('halliwell.parser.models.aiohttp')
-@pytest.mark.asyncio
-async def test_from_id_failure(aiohttp):
-    resp_future = asyncio.Future()
-    resp_future.set_result(mock.MagicMock(
-        status=404,
-    ))
-    aiohttp.get.return_value = resp_future
-    with pytest.raises(ValueError):
-        await TestImplementation.from_id('foo', 'bar')
-    aiohttp.get.assert_called_once_with('http://akas.imdb.com/foo/bar')

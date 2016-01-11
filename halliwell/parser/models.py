@@ -62,16 +62,6 @@ class IMDbBase(metaclass=abc.ABCMeta):
         id_ = cls.URL_REGEX.match(link['href']).group(1)
         return cls(id_, link.string)
 
-    @classmethod
-    async def from_id(cls, type_, id_):
-        response = await aiohttp.get('/'.join((cls.BASE_URL, type_, id_)))
-        if response.status != 200:
-            raise ValueError("Nothing found at '/{}/{}'".format(type_, id_))
-        body = await response.read()
-        soup = BeautifulSoup(body, 'html.parser')
-        title = soup.select('h1 > span[itemprop=name]')[0].string.strip()
-        return cls(id_, title)
-
     @abc.abstractmethod
     def _data(self):
         """The data to use in :py:method:`__str__`."""
