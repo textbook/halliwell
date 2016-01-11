@@ -61,7 +61,7 @@ setup(
     platforms='any',
     tests_require=[
         'asynctest',
-        'pylint',
+        'pylint>=1.5.3',
         'pytest',
         'pytest-asyncio',
         'pytest-pylint',
