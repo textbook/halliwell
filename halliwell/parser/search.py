@@ -81,7 +81,7 @@ class MovieFinder(IMDbFinder):
     """Finder specifically for movies.
 
     Note:
-      Adds the ttype to narrow down results to films only.
+      Adds the ``ttype`` to narrow down results to films only.
 
     """
 
