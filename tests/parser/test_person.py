@@ -3,7 +3,7 @@ from textwrap import dedent
 from asynctest import mock
 import pytest
 
-from halliwell.parser import Movie, Person
+from halliwell.imdb_parser import Movie, Person
 
 from helpers import future_from
 
@@ -25,7 +25,7 @@ def test_str():
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_plot_from_synopsis(get_page_content):
     html = dedent("""
@@ -44,7 +44,7 @@ async def test_find_plot_from_synopsis(get_page_content):
     get_page_content.assert_called_once_with('http://akas.imdb.com/name/foo/bio')
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_update_no_bio(get_page_content):
     get_page_content.return_value = future_from(None)
@@ -79,7 +79,7 @@ async def test_update_bio_exists(get_plot):
     get_plot.assert_not_called()
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_get_filmography_success(get_page_content):
     html = dedent("""
@@ -112,7 +112,7 @@ async def test_get_filmography_success(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_get_filmography_failure(get_page_content):
     get_page_content.return_value = future_from(None)

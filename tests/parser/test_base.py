@@ -4,7 +4,7 @@ from textwrap import dedent
 from asynctest import mock
 import pytest
 
-from halliwell.parser.models import IMDbBase
+from halliwell.imdb_parser.models import IMDbBase
 
 
 class TestImplementation(IMDbBase):

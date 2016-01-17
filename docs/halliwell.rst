@@ -8,13 +8,13 @@ halliwell.bot module
     :members:
     :show-inheritance:
 
-halliwell.parser module
------------------------
+halliwell.imdb_parser module
+----------------------------
 
 .. toctree::
    :maxdepth: 2
 
-   parser
+   imdb_parser
 
 halliwell.utils module
 ----------------------

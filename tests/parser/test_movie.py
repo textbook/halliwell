@@ -1,10 +1,9 @@
-import asyncio
 from textwrap import dedent
 
 from asynctest import mock
 import pytest
 
-from halliwell.parser import Movie, Person
+from halliwell.imdb_parser import Movie, Person
 
 from helpers import future_from
 
@@ -25,7 +24,7 @@ def test_str():
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_plot_from_synopsis(get_page_content):
     html = dedent("""
@@ -41,7 +40,7 @@ async def test_find_plot_from_synopsis(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_plot_from_summaries(get_page_content):
     html = dedent("""
@@ -61,7 +60,7 @@ async def test_find_plot_from_summaries(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_plot_no_data(get_page_content):
     get_page_content.return_value = future_from('<body></body>')
@@ -72,7 +71,7 @@ async def test_find_plot_no_data(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_plot_no_response(get_page_content):
     get_page_content.return_value = future_from(None)
@@ -83,7 +82,7 @@ async def test_find_plot_no_response(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_update_no_plot(get_page_content):
     get_page_content.return_value = future_from('<body></body>')
@@ -96,7 +95,7 @@ async def test_update_no_plot(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_update_plot(get_page_content):
     html = dedent("""
@@ -114,7 +113,7 @@ async def test_update_plot(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_cast(get_page_content):
     html = dedent("""
@@ -141,7 +140,7 @@ async def test_find_cast(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_cast_no_cast(get_page_content):
     get_page_content.return_value = future_from('<body></body>')
@@ -153,7 +152,7 @@ async def test_find_cast_no_cast(get_page_content):
     )
 
 
-@mock.patch('halliwell.parser.models.get_page_content')
+@mock.patch('halliwell.imdb_parser.models.get_page_content')
 @pytest.mark.asyncio
 async def test_find_cast_no_response(get_page_content):
     get_page_content.return_value = future_from(None)

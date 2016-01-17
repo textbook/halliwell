@@ -59,7 +59,7 @@ class IMDbFinder:
         )
         if body is None:
             return []
-        soup = BeautifulSoup(body, 'html.parser', parse_only=self.TARGET)
+        soup = BeautifulSoup(body, 'html.imdb_parser', parse_only=self.TARGET)
         return [self.parse(element) for _, element in
                 zip(range(results), soup.findAll('tr'))]
 

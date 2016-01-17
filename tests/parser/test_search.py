@@ -3,7 +3,7 @@ from textwrap import dedent
 from asynctest import mock
 import pytest
 
-from halliwell.parser import MOVIE_FINDER, PERSON_FINDER
+from halliwell.imdb_parser import MOVIE_FINDER, PERSON_FINDER
 
 from helpers import future_from
 
@@ -13,7 +13,7 @@ from helpers import future_from
     ((2,), 2),
     ((201,), ValueError),
 ])
-@mock.patch('halliwell.parser.search.get_page_content')
+@mock.patch('halliwell.imdb_parser.search.get_page_content')
 @pytest.mark.asyncio
 async def test_find(get_page_content, args, results):
     html = dedent("""
@@ -49,7 +49,7 @@ async def test_find(get_page_content, args, results):
         assert movie.name, movie.id_ == ('Foo', 'tt0123456')
 
 
-@mock.patch('halliwell.parser.search.get_page_content')
+@mock.patch('halliwell.imdb_parser.search.get_page_content')
 @pytest.mark.asyncio
 async def test_find_person(get_page_content):
     html = dedent("""
@@ -73,7 +73,7 @@ async def test_find_person(get_page_content):
     assert person.name, person.id_ == ('Foo', 'nm0123456')
 
 
-@mock.patch('halliwell.parser.search.get_page_content')
+@mock.patch('halliwell.imdb_parser.search.get_page_content')
 @pytest.mark.asyncio
 async def test_find_no_response(get_page_content):
     get_page_content.return_value = future_from(None)

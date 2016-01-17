@@ -1,5 +1,5 @@
 """Functionality for interfacing with the IMDb objects."""
-from .parser import PERSON_FINDER, MOVIE_FINDER
+from .imdb_parser import PERSON_FINDER, MOVIE_FINDER
 from .utils import friendly_list
 
 

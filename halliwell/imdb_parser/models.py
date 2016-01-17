@@ -121,7 +121,7 @@ class Movie(IMDbBase):
         body = await get_page_content(self.COMBINED_URL.format(id_=self.id_))
         if body is None:
             return set()
-        soup = BeautifulSoup(body, 'html.parser')
+        soup = BeautifulSoup(body, 'html.imdb_parser')
         cast_list = soup.find('table', attrs={'class', 'cast'})
         cast = set()
         if cast_list is None:
@@ -149,7 +149,7 @@ class Movie(IMDbBase):
         body = await get_page_content(self.PLOT_URL.format(id_=self.id_))
         if body is None:
             return
-        soup = BeautifulSoup(body, 'html.parser')
+        soup = BeautifulSoup(body, 'html.imdb_parser')
         summary_list = soup.find('ul', attrs={'class', 'zebraList'})
         if summary_list is not None:
             summaries = summary_list.find_all('li')
@@ -215,7 +215,7 @@ class Person(IMDbBase):
         body = await get_page_content(self.BIO_URL.format(id_=self.id_))
         if body is None:
             return
-        soup = BeautifulSoup(body, 'html.parser')
+        soup = BeautifulSoup(body, 'html.imdb_parser')
         bio_link = soup.find('a', attrs={'name': 'mini_bio'})
         logger.debug(bio_link)
         for sibling in bio_link.next_siblings:
@@ -236,7 +236,7 @@ class Person(IMDbBase):
         if body is None:
             return {}
         filmography = defaultdict(set)
-        soup = BeautifulSoup(body, 'html.parser')
+        soup = BeautifulSoup(body, 'html.imdb_parser')
         roles = soup.select('#filmography > div.head')
         credits_ = soup.select('#filmography > div.filmo-category-section')
         for role, films in zip(roles, credits_):
